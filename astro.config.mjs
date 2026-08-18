@@ -5,7 +5,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   output: 'static',
   site: 'https://zibgger.github.io',
-  base: '/zibgger',
+  base: '/',
   server: {
     host: '0.0.0.0',
   },
