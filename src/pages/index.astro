@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getBlogs, getPortfolios, getImageUrl } from '../lib/strapi';
+
+const blogs = await getBlogs();
+const portfolios = await getPortfolios();
+const latestBlogs = blogs.slice(0, 3);
+const latestPortfolios = portfolios.slice(0, 3);
+---
+
+<Layout title="张克震 - 首页">
+  <section class="hero">
+    <div class="container">
+      <h1>你好，欢迎来到我的空间</h1>
+      <p>这里记录我的思考与创作，分享文字与视觉的灵感。</p>
+      <div class="hero-links">
+        <a href="/blog" class="btn btn-primary">阅读博客</a>
+        <a href="/portfolio" class="btn btn-outline">浏览作品</a>
+      </div>
+    </div>
+  </section>
+
+  {
+    latestBlogs.length > 0 && (
+      <section class="container">
+        <div class="page-header">
+          <h2>最新文章</h2>
+        </div>
+        <div class="card-grid">
+          {latestBlogs.map((item) => {
+            const cover = item.cover;
+            const imgUrl = cover?.length > 0 ? getImageUrl(cover[0]) : '';
+            return (
+              <a href={`/blog/${item.slug}`} class="card">
+                {imgUrl && <img src={imgUrl} alt={item.title} class="card-image" loading="lazy" />}
+                <div class="card-body">
+                  <h2>{item.title}</h2>
+                  <p class="meta">{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('zh-CN') : ''}</p>
+                  <p class="excerpt">{item.excerpt}</p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latestPortfolios.length > 0 && (
+      <section class="container">
+        <div class="page-header">
+          <h2>精选作品</h2>
+        </div>
+        <div class="card-grid">
+          {latestPortfolios.map((item) => {
+            const cover = item.cover;
+            const imgUrl = cover?.length > 0 ? getImageUrl(cover[0]) : '';
+            return (
+              <a href={`/portfolio/${item.slug}`} class="card">
+                {imgUrl && <img src={imgUrl} alt={item.title} class="card-image" loading="lazy" />}
+                <div class="card-body">
+                  <h2>{item.title}</h2>
+                  <p class="meta">{item.category}</p>
+                  <p class="excerpt">{item.description}</p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latestBlogs.length === 0 && latestPortfolios.length === 0 && (
+      <section class="container" style="text-align:center;padding:60px 0;color:var(--color-muted);">
+        <p>暂无内容，请在 Strapi 后台添加博客文章和作品。</p>
+        <p style="margin-top:8px">Strapi 管理面板: <a href="http://localhost:1337/admin" style="color:var(--color-accent)">http://localhost:1337/admin</a></p>
+      </section>
+    )
+  }
+</Layout>

@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getBlogs, getImageUrl } from '../lib/strapi';
+
+const blogs = await getBlogs();
+---
+
+<Layout title="博客 - 张克震">
+  <section class="page-header container">
+    <h1>博客</h1>
+    <p>记录思考、技术与生活</p>
+  </section>
+
+  <section class="container">
+    {blogs.length > 0 ? (
+      <div class="card-grid">
+        {blogs.map((item) => {
+          const cover = item.cover;
+          const imgUrl = cover?.length > 0 ? getImageUrl(cover[0]) : '';
+          return (
+            <a href={`/blog/${item.slug}`} class="card">
+              {imgUrl && <img src={imgUrl} alt={item.title} class="card-image" loading="lazy" />}
+              <div class="card-body">
+                <h2>{item.title}</h2>
+                <p class="meta">{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('zh-CN') : ''}</p>
+                <p class="excerpt">{item.excerpt}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    ) : (
+      <div style="text-align:center;padding:60px 0;color:var(--color-muted);">
+        <p>还没有文章，请前往 Strapi 后台创建。</p>
+      </div>
+    )}
+  </section>
+</Layout>

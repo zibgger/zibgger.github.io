@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getPortfolios, getPortfolio, getImageUrl } from '../../lib/strapi';
+
+export async function getStaticPaths() {
+  const portfolios = await getPortfolios();
+  return portfolios.map((p) => ({
+    params: { slug: p.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const portfolio = await getPortfolio(slug);
+---
+
+<Layout title={`${portfolio?.title || '作品'} - 张克震`}>
+  {portfolio ? (
+    <article class="article container">
+      <header class="article-header">
+        <h1>{portfolio.title}</h1>
+        <p class="meta">
+          {portfolio.category}{portfolio.publishedAt ? ` · ${new Date(portfolio.publishedAt).toLocaleDateString('zh-CN')}` : ''}
+        </p>
+      </header>
+
+      {portfolio.cover?.length > 0 && (
+        <img src={getImageUrl(portfolio.cover[0])} alt={portfolio.title} class="article-cover" />
+      )}
+
+      <div class="article-body">
+        <p>{portfolio.description}</p>
+      </div>
+
+      {portfolio.images?.length > 0 && (
+        <div style="max-width:720px;margin:40px auto 0;">
+          <h3 style="font-size:1.2rem;margin-bottom:16px;">作品图片</h3>
+          <div class="gallery">
+            {portfolio.images.map((img) => (
+              <img src={getImageUrl(img)} alt={img.alternativeText || portfolio.title} loading="lazy" />
+            ))}
+          </div>
+        </div>
+      )}
+    </article>
+  ) : (
+    <section class="not-found container">
+      <h2>作品未找到</h2>
+      <p>该作品不存在或已被删除。</p>
+      <a href="/portfolio" class="btn btn-primary">返回作品集</a>
+    </section>
+  )}
+</Layout>

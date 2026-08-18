@@ -1,0 +1,39 @@
+---
+import { marked } from 'marked';
+import Layout from '../../layouts/Layout.astro';
+import { getBlogs, getBlog, getImageUrl } from '../../lib/strapi';
+
+export async function getStaticPaths() {
+  const blogs = await getBlogs();
+  return blogs.map((blog) => ({
+    params: { slug: blog.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const blog = await getBlog(slug);
+const contentHtml = blog?.content ? marked.parse(blog.content) : '';
+---
+
+<Layout title={`${blog?.title || '文章'} - 张克震`}>
+  {blog ? (
+    <article class="article container">
+      <header class="article-header">
+        <h1>{blog.title}</h1>
+        <p class="meta">{blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString('zh-CN') : ''}</p>
+      </header>
+      {blog.cover?.length > 0 && (
+        <img src={getImageUrl(blog.cover[0])} alt={blog.title} class="article-cover" />
+      )}
+      {contentHtml && (
+        <div class="article-body" set:html={contentHtml} />
+      )}
+    </article>
+  ) : (
+    <section class="not-found container">
+      <h2>文章未找到</h2>
+      <p>该文章不存在或已被删除。</p>
+      <a href="/blog" class="btn btn-primary">返回博客</a>
+    </section>
+  )}
+</Layout>
